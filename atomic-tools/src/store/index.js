@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { createStore } from 'vuex';
+//import { Auth, app } from 'firebase/auth';
 
 // TODO: Refactor this
 // const availableThemes = ['theme-dark', 'theme-light', 'theme-dracula'];
@@ -11,6 +12,7 @@ export default createStore({
     filePath: '',
     fileName: '',
     fileType: '',
+    loggedIn: false,
 
     // Global Settings
     activeTheme: 'theme-dark',
@@ -76,6 +78,9 @@ export default createStore({
     setShowExportingUI(state, showExportingUI) {
       state.showExportingUI = showExportingUI;
     },
+    SET_LOGGED_IN(state, value) {
+      state.user.loggedIn = value;
+    },
   },
   getters: {
     fileUrl(state) {
@@ -119,7 +124,34 @@ export default createStore({
     showExportingUI(state) {
       return state.showExportingUI;
     },
+    user(state){
+      return state.user
+    }
   },
-  actions: {},
+  actions: {
+    async register(context, { email, password, name}){
+      const response = await createUserWithEmailAndPassword(auth, email, password)
+      if (response) {
+          context.commit('SET_USER', response.user)
+          response.user.updateProfile({displayName: name})
+      } else {
+          throw new Error('Unable to register user')
+      }
+    },
+
+    async logIn(context, { email, password }){
+      const response = await signInWithEmailAndPassword(auth, email, password)
+      if (response) {
+          context.commit('SET_USER', response.user)
+      } else {
+          throw new Error('login failed')
+      }
+    },
+
+    async logOut(context){
+        await signOut(auth)
+        context.commit('SET_USER', null)
+    }
+  },
   modules: {},
 });
