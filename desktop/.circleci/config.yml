@@ -1,0 +1,17 @@
+version: 2
+jobs:
+  build_windows:
+    docker:
+      - image: electronuserland/builder:wine
+    steps:
+      - checkout
+      - run: yarn && yarn run build
+      - store_artifacts:
+          path: /root/project/build
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build_windows
+      - build_macos
